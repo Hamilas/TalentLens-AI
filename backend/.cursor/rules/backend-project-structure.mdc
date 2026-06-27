@@ -1,0 +1,32 @@
+# Backend Project Structure
+
+This is a production-ready TalentLens-AI backend using FastAPI, SQLAlchemy 2.0, Pydantic V2, and LangGraph for AI agents.
+
+## Project Structure
+
+```
+backend/
+├── src/
+│   ├── app/
+│   │   ├── agents/           # AI agents and LangGraph implementation
+│   │   ├── api/              # API endpoints and routing
+│   │   ├── core/             # Core application logic
+│   │   ├── models/           # SQLAlchemy database models
+│   │   ├── repositories/     # Data access layer
+│   │   ├── schemas/          # Pydantic data models
+│   │   └── utils/            # Utility functions
+│   ├── data/                 # Mock data and cached responses
+│   └── migrations/           # Database migrations
+├── tests/                    # Test suite
+├── docker/                   # Docker configurations
+└── pyproject.toml           # Project configuration
+```
+
+## Key Components
+
+- **Agents**: Multi-agent AI system using LangGraph
+- **API**: RESTful endpoints with proper error handling
+- **Core**: Configuration, database setup, and application logic
+- **Models**: SQLAlchemy models with async support
+- **Schemas**: Pydantic models for validation
+- **Testing**: Comprehensive test suite with pytest

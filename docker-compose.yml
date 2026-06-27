@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: docker/dev/Dockerfile.dev
+      target: development
+    container_name: talentlens-api
+    ports:
+      - "8073:8000"
+    environment:
+      - STORAGE_TYPE=memory
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - USE_LLM_CACHE=TRUE
+    volumes:
+      - ./backend/src:/code/src
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

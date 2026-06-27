@@ -1,0 +1,140 @@
+[project]
+name = "interview-insight-ai"
+version = "1.0.0"
+description = "A production-ready AI-powered interview transcript analysis platform using FastAPI, SQLAlchemy 2.0, Pydantic V2, and LangGraph"
+authors = [{ name = "TalentLens-AI", email = "dev@example.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # Core application dependencies
+    "fastapi>=0.109.1",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.6.1",
+    "pydantic-settings>=2.0.3",
+    "sqlalchemy>=2.0.25",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.9",
+    "alembic>=1.13.1",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.26.0",
+    "greenlet>=2.0.2",
+    "python-json-logger>=2.0.7",
+    "gunicorn>=21.2.0",
+    "numexpr>=2.11.0",
+    "aiosqlite>=0.20.0",
+    # AI and LangGraph dependencies
+    "langgraph>=0.3.0",
+    "langchain>=0.3.0",
+    "langchain-anthropic>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-core>=0.3.0",
+    "duckduckgo-search>=4.1.1",
+    "langchain-openai>=0.3.31",
+    "langchain-groq>=0.2.0",
+]
+
+[project.optional-dependencies]
+# Development dependencies (for local development)
+dev = [
+    "pytest>=7.4.2",
+    "pytest-asyncio>=1.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest-cov>=6.2.1",
+    "faker>=26.0.0",
+    "aiosqlite>=0.20.0",
+    "ruff>=0.11.13",
+    "mypy>=1.16.0",
+]
+
+# Testing dependencies (for running tests)
+test = [
+    "pytest>=7.4.2",
+    "pytest-asyncio>=1.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest-cov>=6.2.1",
+    "faker>=26.0.0",
+    "aiosqlite>=0.20.0",
+]
+
+# Linting and type checking dependencies
+lint = [
+    "ruff>=0.11.13",
+    "mypy>=1.16.0",
+]
+
+# Production dependencies (minimal runtime)
+prod = [
+    # Only essential runtime dependencies
+    "fastapi>=0.109.1",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.6.1",
+    "pydantic-settings>=2.0.3",
+    "sqlalchemy>=2.0.25",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.9",
+    "alembic>=1.13.1",
+    "python-dotenv>=1.0.0",
+    "greenlet>=2.0.2",
+    "python-json-logger>=2.0.7",
+    "gunicorn>=21.2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = ["src/"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/"]
+packages = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "F", # Pyflakes
+    "E", # pycodestyle
+    "W", # Warning
+    "C", # Complexity & comprehensions
+    "UP", # pyupgrade
+    "I", # isort
+]
+ignore = [
+    "E402", # module level import not at top of file
+    "UP006", # use-pep585-annotation
+    "UP007", # use-pep604-annotation
+    "E741",  # Ambiguous variable name
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401", # unused import
+    "F403", # star imports
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 24
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::PendingDeprecationWarning:starlette.formparsers",
+]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+mypy_path = "src"
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = "src.app.*"
+disallow_untyped_defs = true

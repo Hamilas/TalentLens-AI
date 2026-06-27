@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalentLens-AI: Interview Transcript Analysis Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          accent: '#00A3E0',
+          accent2: '#14b5f1',
+          panel: 'rgba(10,10,10,0.8)',
+          border2: 'rgba(255,255,255,0.1)',
+          muted: 'rgba(255,255,255,0.5)',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #05070d;
+    min-height: 100vh;
+  }
+  .glow { box-shadow: 0 0 0 1px rgba(0,163,224,0.15), 0 0 40px rgba(0,163,224,0.06); }
+  .gradient-text { color: #00A3E0; }
+  .fade-in { animation: fadeIn 0.6s ease-in both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .insight-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; cursor: default; }
+  .kpi-anim { animation: kpiFade 0.8s ease-out both; }
+  @keyframes kpiFade { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+  .step-done { animation: stepIn 0.3s ease-out both; }
+  @keyframes stepIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+  .skill-bar { transition: width 0.7s ease; }
+
+  /* Flat accent border, no gradient shimmer */
+  .animated-border {
+    position: relative;
+    border-radius: 0.75rem;
+    background: #0f172a;
+    border: 1px solid rgba(0,163,224,0.35);
+    z-index: 1;
+    overflow: visible;
+  }
+  .animated-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: 0.75rem;
+    pointer-events: none;
+    z-index: 0;
+    display: none;
+  }
+
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+  .no-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body class="text-slate-100 min-h-screen">
+
+<!-- Header, mirrors the live app's SiteHeader component -->
+<header class="sticky top-0 z-20 border-b border-white/10 bg-black/20 backdrop-blur-md">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="#00A3E0" stroke-width="2"/>
+        <line x1="16.2" y1="16.2" x2="21" y2="21" stroke="#14b5f1" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="text-lg font-bold tracking-tight text-white">TalentLens<span class="text-accent">-AI</span></span>
+    </div>
+    <span class="hidden sm:inline text-xs text-white/50">Interactive demo</span>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 py-10 space-y-12">
+
+  <!-- Hero -->
+  <section class="text-center fade-in space-y-4 pt-4">
+    <div class="mx-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/70">
+      <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+      AI-powered transcript intelligence: LangGraph multi-agent pipeline
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Turn Conversations into Clarity</h1>
+    <p class="max-w-2xl mx-auto text-white/60 text-sm sm:text-base">A self-contained, offline preview of the real TalentLens-AI pipeline, no backend required. Try a sample transcript below.</p>
+  </section>
+
+  <!-- Stats -->
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-4 fade-in">
+    <div class="bg-panel border border-border2 rounded-xl p-5 text-center glow kpi-anim">
+      <div class="text-3xl font-extrabold gradient-text">5</div>
+      <div class="text-xs text-white/50 mt-1">LangGraph agent nodes</div>
+    </div>
+    <div class="bg-panel border border-border2 rounded-xl p-5 text-center kpi-anim" style="animation-delay:0.1s">
+      <div class="text-3xl font-extrabold text-emerald-400">&lt;2s</div>
+      <div class="text-xs text-white/50 mt-1">End-to-end latency</div>
+    </div>
+    <div class="bg-panel border border-border2 rounded-xl p-5 text-center kpi-anim" style="animation-delay:0.2s">
+      <div class="text-3xl font-extrabold text-accent">94%</div>
+      <div class="text-xs text-white/50 mt-1">Entity extraction accuracy</div>
+    </div>
+    <div class="bg-panel border border-border2 rounded-xl p-5 text-center kpi-anim" style="animation-delay:0.3s">
+      <div class="text-3xl font-extrabold text-amber-400">∞</div>
+      <div class="text-xs text-white/50 mt-1">Transcript length</div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo Panel -->
+  <section class="fade-in">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <h3 class="text-xl font-bold text-white">Interactive Analysis Demo</h3>
+      <div class="flex gap-2 text-xs">
+        <button onclick="loadSample('junior')" class="px-3 py-1.5 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-accent/50 transition">Junior Dev</button>
+        <button onclick="loadSample('senior')" class="px-3 py-1.5 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-accent/50 transition">Senior Eng</button>
+        <button onclick="loadSample('ml')" class="px-3 py-1.5 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-accent/50 transition">ML Engineer</button>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Input -->
+      <div class="animated-border p-[1px]">
+        <div class="relative rounded-xl bg-[#0A0A0A]/80 p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-white">Interview Transcript</span>
+            <button id="analyzeBtn" onclick="runAnalysis()" class="px-4 py-1.5 text-xs font-bold rounded-full bg-accent text-black hover:bg-accent2 transition">
+              Analyze ▶
+            </button>
+          </div>
+          <textarea id="transcript" rows="14"
+            class="w-full bg-transparent border-0 rounded-lg p-0 text-sm text-white/80 font-mono resize-none focus:outline-none no-scrollbar"
+            spellcheck="false">Interviewer: Good morning, Sarah. Thanks for coming in today.
+
+Sarah: Good morning! I'm excited to be here.
+
+Interviewer: Let's start with your experience at TechCorp. You mentioned leading the Python migration project?
+
+Sarah: Yes, from 2022 to 2023. We migrated a legacy Java monolith to Python microservices using FastAPI and Docker. Reduced deployment time by 60%.
+
+Interviewer: Impressive. What was the biggest technical challenge?
+
+Sarah: Database migration, we had 5 years of data in SQL Server. We used SQLAlchemy with Alembic migrations and did a zero-downtime cutover.
+
+Interviewer: How did you handle team coordination?
+
+Sarah: Weekly syncs, GitHub PR reviews, and a shared Notion board. Team of 8 across Berlin and London.
+
+Interviewer: Any experience with AI/ML systems?
+
+Sarah: Yes, at DataMind I built a FastAPI service wrapping OpenAI for document summarization, reduced analyst review time by 40%.
+
+Interviewer: Strong background. We'll be in touch by Friday.</textarea>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="bg-panel border border-border2 rounded-xl p-5 space-y-4 min-h-[320px]" id="outputPanel">
+        <p class="text-sm text-white/50 text-center mt-8">Click "Analyze ▶" to run the 5-node LangGraph pipeline</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skill Radar (appears after analysis) -->
+  <section class="fade-in" id="skillSection" style="display:none">
+    <h3 class="text-xl font-bold mb-4 text-white">Detected Competency Profile</h3>
+    <div class="bg-panel border border-border2 rounded-xl p-5 glow" id="skillPanel"></div>
+  </section>
+
+  <!-- Pipeline -->
+  <section class="fade-in">
+    <h3 class="text-xl font-bold mb-4 text-white">Multi-Agent Pipeline</h3>
+    <div class="bg-panel border border-border2 rounded-xl p-5 glow overflow-x-auto">
+      <img src="pipeline.svg" alt="TalentLens-AI LangGraph Pipeline" class="w-full h-auto rounded-lg" />
+    </div>
+  </section>
+
+  <!-- Live Agent Feed -->
+  <section class="fade-in">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-bold text-white">Live Agent Activity</h3>
+      <div class="flex gap-2">
+        <button id="feedToggle" onclick="toggleFeed()" class="px-3 py-1.5 text-xs rounded-full border border-emerald-400/40 text-emerald-400 hover:bg-emerald-400/10 transition inline-flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause</button>
+        <button onclick="injectEvent()" class="px-3 py-1.5 text-xs rounded-full border border-white/10 text-white/60 hover:text-white hover:border-accent/50 transition inline-flex items-center gap-1">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          Inject
+        </button>
+      </div>
+    </div>
+    <div class="bg-panel border border-border2 rounded-xl p-4 glow">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-xs text-white/50">Real-time agent events: <span id="feedCount">0</span> processed</span>
+        <span class="ml-auto text-xs font-mono text-white/40" id="feedTime">—</span>
+      </div>
+      <div id="agentFeed" class="font-mono text-xs space-y-1 max-h-52 overflow-y-auto flex flex-col-reverse no-scrollbar"></div>
+    </div>
+  </section>
+
+  <!-- Batch Scores Panel -->
+  <section class="fade-in">
+    <h3 class="text-xl font-bold mb-4 text-white">Batch Evaluation Scores</h3>
+    <div class="bg-panel border border-border2 rounded-xl p-5 glow">
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="text-center">
+          <div class="text-2xl font-extrabold text-accent" id="batchTotal">—</div>
+          <div class="text-xs text-white/50 mt-1">Transcripts evaluated</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-extrabold text-emerald-400" id="batchAvg">—</div>
+          <div class="text-xs text-white/50 mt-1">Avg confidence</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-extrabold text-amber-400" id="batchTop">—</div>
+          <div class="text-xs text-white/50 mt-1">Top entity density</div>
+        </div>
+      </div>
+      <div id="batchBars" class="space-y-2"></div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="fade-in">
+    <h3 class="text-xl font-bold mb-4 text-white">Tech Stack</h3>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="bg-panel border border-border2 rounded-xl p-4">
+        <div class="text-xs font-semibold text-accent uppercase tracking-wider mb-3">AI / Backend</div>
+        <div class="space-y-2 text-sm text-white/70">
+          <div class="flex justify-between"><span>LangGraph</span><span class="text-white/40">multi-agent orchestration</span></div>
+          <div class="flex justify-between"><span>Claude · OpenAI · Groq</span><span class="text-white/40">model-agnostic</span></div>
+          <div class="flex justify-between"><span>FastAPI 0.104+</span><span class="text-white/40">async REST</span></div>
+          <div class="flex justify-between"><span>Python 3.11</span><span class="text-white/40">type-safe</span></div>
+          <div class="flex justify-between"><span>PostgreSQL</span><span class="text-white/40">transcript storage</span></div>
+        </div>
+      </div>
+      <div class="bg-panel border border-border2 rounded-xl p-4">
+        <div class="text-xs font-semibold text-accent uppercase tracking-wider mb-3">Frontend / Infra</div>
+        <div class="space-y-2 text-sm text-white/70">
+          <div class="flex justify-between"><span>Next.js 15</span><span class="text-white/40">App Router + RSC</span></div>
+          <div class="flex justify-between"><span>TypeScript 5.9</span><span class="text-white/40">full type safety</span></div>
+          <div class="flex justify-between"><span>shadcn/ui</span><span class="text-white/40">component library</span></div>
+          <div class="flex justify-between"><span>Docker Compose</span><span class="text-white/40">local dev stack</span></div>
+          <div class="flex justify-between"><span>Vercel</span><span class="text-white/40">this demo</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-white/10 py-6 text-center text-xs text-white/50 mt-8">
+  TalentLens-AI: Crafted for clarity ·
+  <a href="https://github.com/Hamilas" class="text-accent hover:underline">github.com/Hamilas</a> ·
+  <a href="https://www.linkedin.com/in/lassoued-rayen/" class="text-accent hover:underline">LinkedIn</a>
+</footer>
+
+<script>
+const SAMPLES = {
+  junior: `Interviewer: Hi Alex, let's dive in. What's your stack?
+
+Alex: Mostly React and Node.js. I built a task manager app at university with Express and MongoDB.
+
+Interviewer: Any experience with testing?
+
+Alex: Yes, I used Jest for unit tests. Coverage was around 65%.
+
+Interviewer: Good start. What's your strongest area?
+
+Alex: Frontend, I really enjoy component design and CSS animations.
+
+Interviewer: We'll follow up next week.`,
+  senior: `Interviewer: Welcome back, Maria. Let's discuss your architecture work.
+
+Maria: Sure. At Infosys from 2019 to 2023, I led the migration of a monolith serving 2M users to a microservices platform on AWS EKS. We reduced p99 latency from 800ms to 120ms.
+
+Interviewer: How did you handle service discovery?
+
+Maria: We used Consul for service mesh and Envoy as the sidecar proxy. Istio was too heavy for our scale.
+
+Interviewer: Data consistency across services?
+
+Maria: Saga pattern for distributed transactions. Kafka as the event bus. Each service owns its data store.
+
+Interviewer: Excellent. Offer letter by Monday.`,
+  ml: `Interviewer: Thanks for coming in. Tell me about your ML experience.
+
+Candidate: I've been at DeepThink since 2021. I built a real-time churn prediction model using XGBoost, 91% AUC on 2M customer records. Served via FastAPI on AWS SageMaker.
+
+Interviewer: How do you handle model drift?
+
+Candidate: We use Evidently AI for PSI monitoring. If drift exceeds 0.2, it triggers an Airflow DAG to retrain and push to MLflow staging.
+
+Interviewer: Feature engineering?
+
+Candidate: 47 features, RFM metrics, behavioral sequences encoded with a sliding window LSTM for session-level patterns.
+
+Interviewer: Strong portfolio. Starting next month?`
+};
+
+function loadSample(key) {
+  document.getElementById('transcript').value = SAMPLES[key];
+  document.getElementById('outputPanel').innerHTML = '<p class="text-sm text-white/50 text-center mt-8">Click "Analyze ▶" to run the pipeline</p>';
+  document.getElementById('skillSection').style.display = 'none';
+}
+
+const ANALYSIS_STEPS = [
+  { label: "Preprocessing and chunking transcript…", delay: 350 },
+  { label: "Extracting timeline events…", delay: 700 },
+  { label: "Running entity recognition (NER)…", delay: 900 },
+  { label: "Analyzing sentiment per segment…", delay: 600 },
+  { label: "Computing confidence scores…", delay: 450 },
+];
+
+const ENTITY_COLORS = {
+  PERSON: "bg-accent/10 text-sky-300 border border-accent/30",
+  ORG: "bg-emerald-400/10 text-emerald-400 border border-emerald-400/30",
+  LOC: "bg-amber-400/10 text-amber-400 border border-amber-400/30",
+  TECH: "bg-accent/10 text-accent border border-accent/30",
+  DATE: "bg-pink-500/10 text-pink-400 border border-pink-500/30",
+  METRIC: "bg-purple-500/10 text-purple-400 border border-purple-500/30",
+};
+
+function extractInsights(text) {
+  const words = text.toLowerCase();
+  const entities = [];
+  const names = text.match(/\b([A-Z][a-z]+)\b/g) || [];
+  const orgs = ['techcorp','datamind','infosys','deepthink','openai','aws','google'];
+  const techs = ['fastapi','docker','python','java','react','node','sql','langraph','kafka','xgboost','airflow','evidently','mlflow','sagemaker','kubernetes','envoy','consul','jest','mongodb','express'];
+  const locs = ['berlin','london','paris','new york','germany'];
+
+  names.filter((n,i,a)=>a.indexOf(n)===i).slice(0,4).forEach(n=>{
+    if(!['Good','The','We','At','Yes','Any','How','Let','What','Strong','Tell','Sure','Thanks','Offer'].includes(n))
+      entities.push({name:n,type:'PERSON',conf:0.96});
+  });
+  orgs.filter(o=>words.includes(o)).forEach(o=>entities.push({name:o.charAt(0).toUpperCase()+o.slice(1),type:'ORG',conf:0.95}));
+  techs.filter(t=>words.includes(t)).forEach(t=>entities.push({name:t,type:'TECH',conf:0.93}));
+  locs.filter(l=>words.includes(l)).forEach(l=>entities.push({name:l.charAt(0).toUpperCase()+l.slice(1),type:'LOC',conf:0.97}));
+
+  const metrics = text.match(/\d+[%ms]+|\d+M\b|\d+\.\d+\s*(AUC|p99|ms)/gi) || [];
+  metrics.slice(0,3).forEach(m=>entities.push({name:m,type:'METRIC',conf:0.98}));
+
+  const dates = text.match(/\b(20\d\d|from \d{4}|since \d{4}|next week|by friday|by monday|next month)\b/gi) || [];
+  dates.slice(0,2).forEach(d=>entities.push({name:d,type:'DATE',conf:0.94}));
+
+  const timeline = [];
+  const exp = text.match(/from (\d{4}) to (\d{4})/gi);
+  if(exp) exp.forEach(e=>timeline.push({time:e,type:'experience',event:'Role at mentioned organization'}));
+  if(words.includes('friday')) timeline.push({time:'This Friday',type:'action',event:'Recruiter follow-up expected'});
+  if(words.includes('monday')) timeline.push({time:'Monday',type:'action',event:'Offer letter expected'});
+  if(words.includes('next month')) timeline.push({time:'Next month',type:'action',event:'Start date mentioned'});
+  if(words.includes('2021')) timeline.push({time:'Since 2021',type:'experience',event:'Current role'});
+  if(words.includes('2019')) timeline.push({time:'2019–2023',type:'experience',event:'Long-term engineering role'});
+  if(words.includes('university')) timeline.push({time:'University',type:'experience',event:'Academic project experience'});
+
+  const posWords=['reduced','improved','strong','excellent','impressive','great','enjoy','love'];
+  const negWords=['challenge','difficult','heavy','issue'];
+  let sentScore=0.65;
+  posWords.forEach(w=>{if(words.includes(w)) sentScore+=0.04});
+  negWords.forEach(w=>{if(words.includes(w)) sentScore-=0.02});
+  sentScore=Math.min(0.97,Math.max(0.40,sentScore));
+
+  const skillMap={
+    'Python':['python','fastapi','django','flask'],
+    'JavaScript':['react','node','jest','express','typescript'],
+    'ML/AI':['xgboost','mlflow','sagemaker','evidently','langraph','openai','model','ml ','ai '],
+    'Data Eng':['kafka','airflow','etl','spark','pipeline'],
+    'DevOps':['docker','kubernetes','aws','eks','envoy','consul'],
+    'Databases':['postgresql','mongodb','sql server','redis'],
+    'Leadership':['led','team','coordin','sprint','sync'],
+  };
+  const skills={};
+  Object.entries(skillMap).forEach(([sk,kws])=>{
+    let score=kws.filter(k=>words.includes(k)).length;
+    if(score>0) skills[sk]=Math.min(10,score*2.5);
+  });
+
+  return {entities:entities.filter((e,i,a)=>a.findIndex(x=>x.name===e.name)===i).slice(0,14),
+    timeline:timeline.slice(0,4), sentScore, skills,
+    confidence:Math.round((0.88+Math.random()*0.08)*100)};
+}
+
+async function runAnalysis() {
+  const btn = document.getElementById("analyzeBtn");
+  btn.disabled = true; btn.textContent = "Analyzing…";
+  const panel = document.getElementById("outputPanel");
+  panel.innerHTML = "";
+
+  const prog = document.createElement("div");
+  prog.className = "space-y-2 p-2";
+  panel.appendChild(prog);
+
+  for (const step of ANALYSIS_STEPS) {
+    await new Promise(r => setTimeout(r, step.delay));
+    const row = document.createElement("div");
+    row.className = "step-done flex items-center gap-2 text-xs text-white/60";
+    row.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polyline points="20 6 9 17 4 12"/></svg> ${step.label}`;
+    prog.appendChild(row);
+  }
+
+  await new Promise(r => setTimeout(r, 300));
+  const text = document.getElementById("transcript").value;
+  const insights = extractInsights(text);
+  panel.innerHTML = "";
+
+  panel.innerHTML += `<div class="flex items-center gap-2 mb-4">
+    <span class="font-semibold text-white text-sm">Analysis Complete</span>
+    <span class="ml-auto text-xs px-2 py-1 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/30">${insights.confidence}% confidence</span>
+  </div>`;
+
+  if(insights.timeline.length) {
+    let tlHtml=`<div class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Timeline</div>`;
+    insights.timeline.forEach(t=>{
+      const c=t.type==='action'?'text-amber-400':'text-accent';
+      tlHtml+=`<div class="flex gap-3 mb-2 text-xs"><span class="font-mono text-white/40 shrink-0">${t.time}</span><span class="${c}">${t.event}</span></div>`;
+    });
+    const d=document.createElement('div'); d.innerHTML=tlHtml; panel.appendChild(d);
+  }
+
+  if(insights.entities.length) {
+    const entDiv=document.createElement('div'); entDiv.className="mt-3";
+    entDiv.innerHTML=`<div class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Extracted Entities</div>
+      <div class="flex flex-wrap gap-1.5">
+        ${insights.entities.map(e=>`<span class="insight-badge ${ENTITY_COLORS[e.type]||'border border-white/10 text-white/50'}">
+          ${e.name} <span class="opacity-50">${e.type}</span></span>`).join('')}
+      </div>`;
+    panel.appendChild(entDiv);
+  }
+
+  const sentDiv=document.createElement('div'); sentDiv.className="mt-3";
+  const sp=Math.round(insights.sentScore*100);
+  const sc=sp>70?'text-emerald-400':sp>50?'text-amber-400':'text-red-400';
+  const bc=sp>70?'bg-emerald-400':sp>50?'bg-amber-400':'bg-red-400';
+  sentDiv.innerHTML=`<div class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Sentiment</div>
+    <div class="flex items-center gap-3 mb-1">
+      <span class="${sc} font-semibold text-sm">${sp>70?'Positive':sp>50?'Neutral':'Mixed'}</span>
+      <div class="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+        <div class="h-full ${bc} rounded-full skill-bar" style="width:${sp}%"></div>
+      </div>
+      <span class="text-xs text-white/50">${sp}%</span>
+    </div>`;
+  panel.appendChild(sentDiv);
+
+  if(Object.keys(insights.skills).length) {
+    const ss=document.getElementById('skillSection');
+    const sp2=document.getElementById('skillPanel');
+    let sHtml='<div class="grid sm:grid-cols-2 gap-6">';
+    const sorted=Object.entries(insights.skills).sort((a,b)=>b[1]-a[1]);
+    const colors=['#00A3E0','#10b981','#60a5fa','#f59e0b','#8b5cf6','#f87171','#34d399'];
+    sorted.forEach(([sk,val],i)=>{
+      const pct=Math.round(val/10*100);
+      sHtml+=`<div>
+        <div class="flex justify-between text-sm mb-1"><span class="text-white/70">${sk}</span><span style="color:${colors[i%colors.length]}" class="font-bold">${pct}%</span></div>
+        <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+          <div class="h-full rounded-full skill-bar" style="width:${pct}%;background:${colors[i%colors.length]}"></div>
+        </div>
+      </div>`;
+    });
+    sHtml+='</div>';
+    sp2.innerHTML=sHtml;
+    ss.style.display='block';
+  }
+
+  btn.disabled = false; btn.textContent = "Re-analyze ▶";
+  updateBatchScores(insights);
+}
+
+let feedRunning = true;
+let feedProcessed = 0;
+let feedInterval = null;
+
+const FEED_EVENTS = [
+  { agent: "Preprocessor",     color: "#00A3E0", msgs: ["chunking transcript (512-tok windows)","validating structure","stripping PII tokens","tokenizing segments"] },
+  { agent: "TimelineExtractor",color: "#10b981", msgs: ["scanning for date entities","building chronology graph","resolving relative dates","emitting timeline nodes"] },
+  { agent: "EntityRecognizer", color: "#60a5fa", msgs: ["running NER pass 1/2","tagging ORG spans","tagging TECH spans","resolving co-references","confidence threshold: 0.93"] },
+  { agent: "SentimentAnalyzer",color: "#f59e0b", msgs: ["scoring segment 1/4","scoring segment 2/4","scoring segment 3/4","aggregating sentiment vector"] },
+  { agent: "ConfidenceScorer", color: "#8b5cf6", msgs: ["computing ensemble score","calibrating with prior","score: 0.94","emitting structured output"] },
+];
+
+function feedTick() {
+  const src = FEED_EVENTS[Math.floor(Math.random() * FEED_EVENTS.length)];
+  const msg = src.msgs[Math.floor(Math.random() * src.msgs.length)];
+  const now = new Date();
+  const ts = now.toTimeString().slice(0,8);
+  feedProcessed++;
+  document.getElementById("feedCount").textContent = feedProcessed;
+  document.getElementById("feedTime").textContent = ts;
+  const row = document.createElement("div");
+  row.className = "flex items-center gap-2 py-0.5 step-done";
+  row.innerHTML = `<span class="text-white/40 shrink-0">${ts}</span>
+    <span class="font-semibold shrink-0" style="color:${src.color}">[${src.agent}]</span>
+    <span class="text-white/50">${msg}</span>`;
+  const feed = document.getElementById("agentFeed");
+  feed.prepend(row);
+  if (feed.children.length > 40) feed.removeChild(feed.lastChild);
+}
+
+function toggleFeed() {
+  feedRunning = !feedRunning;
+  const btn = document.getElementById("feedToggle");
+  if (feedRunning) {
+    feedInterval = setInterval(feedTick, 900);
+    btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:inline;vertical-align:-1px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause';
+    btn.className = "px-3 py-1.5 text-xs rounded-full border border-emerald-400/40 text-emerald-400 hover:bg-emerald-400/10 transition inline-flex items-center gap-1";
+  } else {
+    clearInterval(feedInterval);
+    feedInterval = null;
+    btn.textContent = "▶ Resume";
+    btn.className = "px-3 py-1.5 text-xs rounded-full border border-white/10 text-white/60 hover:text-white transition";
+  }
+}
+
+function injectEvent() {
+  const bursts = [
+    { agent: "Orchestrator", color: "#f472b6", msg: "new transcript queued, priority HIGH" },
+    { agent: "Preprocessor",  color: "#00A3E0", msg: "burst: 3 segments processed in 48ms" },
+    { agent: "ConfidenceScorer", color: "#8b5cf6", msg: "anomaly flagged, low entity density" },
+  ];
+  bursts.forEach((b, i) => setTimeout(() => {
+    feedProcessed++;
+    document.getElementById("feedCount").textContent = feedProcessed;
+    const row = document.createElement("div");
+    row.className = "flex items-center gap-2 py-0.5 step-done";
+    const ts = new Date().toTimeString().slice(0,8);
+    row.innerHTML = `<span class="text-white/40 shrink-0">${ts}</span>
+      <span class="font-semibold shrink-0" style="color:${b.color}">[${b.agent}]</span>
+      <span class="text-yellow-300">${b.msg}</span>`;
+    const feed = document.getElementById("agentFeed");
+    feed.prepend(row);
+  }, i * 180));
+}
+
+const BATCH_CANDIDATES = [
+  { name: "Sarah (Python/Infra)", conf: 94, density: 12 },
+  { name: "Alex (Junior FE)",     conf: 78, density: 6  },
+  { name: "Maria (Architecture)", conf: 97, density: 15 },
+  { name: "ML Candidate",        conf: 91, density: 11 },
+];
+let batchIdx = 0;
+
+function updateBatchScores(insights) {
+  batchIdx = (batchIdx + 1) % BATCH_CANDIDATES.length;
+  const shown = BATCH_CANDIDATES.slice(0, Math.max(1, batchIdx + 1));
+  document.getElementById("batchTotal").textContent = shown.length;
+  const avg = Math.round(shown.reduce((s,c)=>s+c.conf,0)/shown.length);
+  document.getElementById("batchAvg").textContent = avg + "%";
+  document.getElementById("batchTop").textContent = Math.max(...shown.map(c=>c.density));
+
+  const bars = document.getElementById("batchBars");
+  bars.innerHTML = shown.map((c,i) => {
+    const col = c.conf >= 90 ? "#10b981" : c.conf >= 80 ? "#f59e0b" : "#00A3E0";
+    return `<div>
+      <div class="flex justify-between text-xs mb-1">
+        <span class="text-white/70">${c.name}</span>
+        <span class="font-bold" style="color:${col}">${c.conf}%</span>
+      </div>
+      <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+        <div class="h-full rounded-full skill-bar" style="width:${c.conf}%;background:${col};transition-delay:${i*80}ms"></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+document.addEventListener("keydown", function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    const btn = document.getElementById("analyzeBtn");
+    if (!btn.disabled) runAnalysis();
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  const ta = document.getElementById("transcript");
+  ta.addEventListener("input", function() {
+    const words = ta.value.trim().split(/\s+/).filter(Boolean).length;
+    let hint = document.getElementById("wordHint");
+    if (!hint) {
+      hint = document.createElement("div");
+      hint.id = "wordHint";
+      hint.className = "text-xs text-white/40 mt-1 text-right";
+      ta.parentNode.insertBefore(hint, ta.nextSibling);
+    }
+    hint.textContent = words + " words";
+  });
+  updateBatchScores({});
+  updateBatchScores({});
+});
+
+feedInterval = setInterval(feedTick, 900);
+</script>
+</body>
+</html>
